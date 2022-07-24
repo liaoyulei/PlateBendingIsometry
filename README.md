@@ -64,4 +64,4 @@ We implement the ResNet with Python 3.10.5 and PyTorch 1.12.0+cpu.
 
 [2] S. Bartels, and C. Palus, *Stable gradient flow discretizations for simulating bilayer plate bending with isometry and obstacle constraints*, IMA J. Numer. Anal., **42** (2022), no. 3, 1903-1928.
 
-[3] H. L. Li, and P. B. Ming, and Z. C. Shi, *The Quadratic Specht Triangle*, J. Comput. Math., **38** (2020), no. 1, 103-124.
+[3] H. L. Li, and P. B. Ming, and Z. C. Shi, *The quadratic Specht triangle*, J. Comput. Math., **38** (2020), no. 1, 103-124.
