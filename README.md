@@ -29,22 +29,28 @@ We implement the ResNet with Python 3.10.5 and PyTorch 1.12.0+cpu.
 * `NNforPossion` solves the Poisson equation in the domain $(0,1)^2$. The boundary is imposed by the penalty term in the loss function.
 
 * `NNforBending` solves the plate bending isometry in the domain $(0,1)^2$. We find that it is difficult to maintain the boundary constraint and the isometry constraint together. So we use the ansatz
-$$
-	u(x,y)=x^2y^2f(x)+[x,y,0]^T,
-$$
-where $f$ is represented by a neural network, and $u$ satisfies the boundary constraint strictly.
+
+	$$
+		u(x,y)=x^2y^2f(x)+[x,y,0]^T,
+	$$
+
+	where $f$ is represented by a neural network, and $u$ satisfies the boundary constraint strictly.
 
 * `NNforBilayer` solves the bilayer bending isometry in the domain $(-5,5)\times (-2,2)$. For convenience, we restore the domain information in the neural network. Similar to before, we use the ansatz
-$$
-	u(x,y)=(x+5)^2f(x)+[x,y,0]^T.
-$$
-The experience shows that it needs 100w iteration. The function $[x,y,0]^T$ here may play a similar role as the initial guess in the finite element method.
+
+	$$
+		u(x,y)=(x+5)^2f(x)+[x,y,0]^T.
+	$$
+
+	The experience shows that it needs 100w iteration. The function $[x,y,0]^T$ here may play a similar role as the initial guess in the finite element method.
 
 * `NN2forBilayer` changes the ansatz to
-$$
-	u(x,y)=(x+5)^2f(x)+g(x)
-$$
-where $f$ is a neural network approximating the interior, and $g$ is a neural network approximating the boundary. The experience shows that the boundary constraint should be included in the total loss, which is not needed in usual. This method trapped in local optimum after 80w iteration while it is flexible because we do not need to guess $g$.
+
+	$$
+		u(x,y)=(x+5)^2f(x)+g(x)
+	$$
+
+	where $f$ is a neural network approximating the interior, and $g$ is a neural network approximating the boundary. The experience shows that the boundary constraint should be included in the total loss, which is not needed in usual. This method trapped in local optimum after 80w iteration while it is flexible because we do not need to guess $g$.
 
 ### Something left
 * The structure of the network, the choice of the loss function, and the penalty factor may influence the result.
