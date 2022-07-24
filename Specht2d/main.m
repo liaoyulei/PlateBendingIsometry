@@ -1,0 +1,52 @@
+clear;
+f = [0; 0; 2.5e-2];
+red = 3;
+dt = 2^(-red);
+[vertices, mesh, Nv, Ne] = init_mesh(2^red);
+[phi, phix, phiy, phixx, phixy, phiyy, T] = init_fespace;
+u = zeros(9*Nv+3*Ne, 1);
+u(1: Nv) = vertices(1: Nv, 1);
+u(Nv+1: 2*Nv) = 1;
+u(3*Nv+Ne+1: 4*Nv+Ne) = vertices(1: Nv, 2);
+u(5*Nv+Ne+1: 6*Nv+Ne) = 1;
+for k = 1: size(mesh, 1)
+    v1 = vertices(mesh(k, 1), :);
+    v2 = vertices(mesh(k, 2), :);
+    v3 = vertices(mesh(k, 3), :);       
+    sgn1 = sign(mesh(k, 3) - mesh(k, 2));
+    sgn2 = sign(mesh(k, 1) - mesh(k, 3));
+    sgn3 = sign(mesh(k, 2) - mesh(k, 1));
+    n = [v3(2)-v2(2); v2(1)-v3(1)];
+    u([mesh(k, 10), 3*Nv+Ne+mesh(k, 10)]) = sgn1/sqrt(n'*n) * n;
+    n = [v1(2)-v3(2); v3(1)-v1(1)];
+    u([mesh(k, 11), 3*Nv+Ne+mesh(k, 11)]) = sgn2/sqrt(n'*n) * n; 
+    n = [v2(2)-v1(2); v1(1)-v2(1)];
+    u([mesh(k, 12), 3*Nv+Ne+mesh(k, 12)]) = sgn3/sqrt(n'*n) * n; 
+end
+[S, F] = FEM(f, vertices, mesh, phi, phixx, phixy, phiyy, T);
+corr = 1;
+not_bdr = prod(vertices, 2);
+free = not_bdr ~= 0;
+free = [free; free; free; free(1: 3*Nv)];
+c = zeros(12*Nv+3*Ne, 1);
+trisurf(mesh(:, 1: 3), u(1: Nv), u(3*Nv+Ne+1: 4*Nv+Ne), u(6*Nv+2*Ne+1: 7*Nv+2*Ne));
+step = 0;
+while corr > 1e-6
+   step = step + 1;
+   B = init_B(u, Nv, Ne); 
+   A = [S, B'; B, zeros(3*Nv)];
+   b = [F - S * u; zeros(3*Nv, 1)];
+   c(free) = A(free, free) \ b(free);
+   du = c(1: 9*Nv+3*Ne);
+   u = u + dt * du;
+   corr = du' * S * du;
+   energy = 1/2 * u' * S * u - F' * u;
+   trisurf(mesh(:, 1: 3), u(1: Nv), u(3*Nv+Ne+1: 4*Nv+Ne), u(6*Nv+2*Ne+1: 7*Nv+2*Ne));
+   u1x = u(Nv+1: 2*Nv);
+   u1y = u(2*Nv+1: 3*Nv);
+   u2x = u(4*Nv+Ne+1: 5*Nv+Ne);
+   u2y = u(5*Nv+Ne+1: 6*Nv+Ne);
+   u3x = u(7*Nv+2*Ne+1: 8*Nv+2*Ne);
+   u3y = u(8*Nv+2*Ne+1: 9*Nv+2*Ne);
+   error = sum(abs([u1x.^2+u2x.^2+u3x.^2-1; u1x.*u1y+u2x.*u2y+u3x.*u3y; u1y.^2+u2y.^2+u3y.^2-1]));
+end
